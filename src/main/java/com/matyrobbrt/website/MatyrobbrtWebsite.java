@@ -25,12 +25,15 @@ public class MatyrobbrtWebsite {
         try (final Reader reader = Files.newBufferedReader(Path.of("config.json"))) {
             configuration = new Gson().fromJson(reader, Configuration.class);
         }
-        cfApi = CurseForgeAPI.builder().apiKey(configuration.cfApiKey()).build();
-
         final ScheduledExecutorService service = Executors.newScheduledThreadPool(1);
 
-        final long projectsRefreshInterval = TimeUnit.HOURS.toSeconds(6);
-        service.scheduleAtFixedRate(() -> ProjectsView.refresh(cfApi, configuration), 3, projectsRefreshInterval, TimeUnit.SECONDS);
+        if (configuration.cfApiKey() != null && !configuration.cfApiKey().isBlank()) {
+            cfApi = CurseForgeAPI.builder().apiKey(configuration.cfApiKey()).build();
+            final long projectsRefreshInterval = TimeUnit.HOURS.toSeconds(6);
+            service.scheduleAtFixedRate(() -> ProjectsView.refresh(cfApi, configuration), 3, projectsRefreshInterval, TimeUnit.SECONDS);
+        } else {
+            ProjectsView.empty();
+        }
 
         SpringApplication.run(MatyrobbrtWebsite.class, args);
     }

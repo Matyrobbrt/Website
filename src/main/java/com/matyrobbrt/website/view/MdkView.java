@@ -74,9 +74,13 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 @PageTitle("Forge MDK Maker")
-@Meta(name = "og:title", content = "Forge MDK Maker")
 @SuppressWarnings("SameParameterValue")
 @Route(value = "/projects/forge-mdk", layout = WebsiteLayout.class)
+@Meta(name = "og:title", content = "Forge MDK Maker")
+@Meta(name = "og:type", content = "website")
+@Meta(name = "og:url", content = "https://matyrobbrt.com/projects/forge-mdk")
+@Meta(name = "og:description", content = "A creator for Forge MDKs")
+@Meta(name = "theme-color", content = "#FF0000")
 public class MdkView extends VerticalLayout {
     public static final Logger LOG = LoggerFactory.getLogger(MdkView.class);
     public static final List<String> LICENSES = List.of(

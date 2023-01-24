@@ -191,6 +191,10 @@ public class ProjectsView extends VerticalLayout {
         modsToDisplay = collectData(api, configuration);
     }
 
+    public static void empty() {
+        modsToDisplay = new ModsToDisplay(List.of(), Map.of());
+    }
+
     public static ModsToDisplay collectData(CurseForgeAPI api, Configuration configuration) {
         final List<Mod> mods = getModsBy(api, configuration.cfUser())
                 .filter(it -> !configuration.modsToExclude().contains(it.slug())).toList();
