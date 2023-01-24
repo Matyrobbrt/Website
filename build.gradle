@@ -1,0 +1,71 @@
+buildscript {
+    repositories {
+    	mavenCentral()
+	    maven { setUrl("https://maven.vaadin.com/vaadin-prereleases") }
+        maven { setUrl("https://maven.vaadin.com/vaadin-addons") }
+		}
+}
+plugins {
+	id 'org.springframework.boot' version '2.7.6'
+	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+	id 'java'
+	id 'com.vaadin'
+}
+
+defaultTasks("clean", "build")
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+repositories {
+	mavenCentral()
+	maven { setUrl("https://maven.vaadin.com/vaadin-prereleases") }
+	maven { setUrl("https://maven.vaadin.com/vaadin-addons") }
+}
+
+configurations {
+	developmentOnly
+	runtimeClasspath {
+		extendsFrom developmentOnly
+	}
+}
+
+dependencies {
+	implementation('com.vaadin:vaadin-spring-boot-starter')
+
+	implementation 'io.github.matyrobbrt:curseforgeapi:1.7.3'
+	implementation 'org.apache.maven:maven-artifact:3.8.7'
+	implementation 'com.google.code.gson:gson:2.10.1'
+	implementation 'com.github.ben-manes.caffeine:caffeine:2.5.5'
+	// implementation 'org.eclipse.jgit:org.eclipse.jgit:6.4.0.202211300538-r'
+	implementation 'org.apache.groovy:groovy-all:4.0.7'
+
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	// compileOnly 'org.springframework.boot:spring-boot-devtools'
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+	}
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "com.vaadin:vaadin-bom:$vaadinVersion"
+	}
+}
+
+test {
+	useJUnitPlatform()
+}
+
+// The following pnpmEnable = true is not needed as pnpm is used by default,
+// this is just an example of how to configure the Gradle Vaadin Plugin:
+// for more configuration options please see: https://vaadin.com/docs/latest/guide/start/gradle/#all-options
+vaadin {
+	pnpmEnable = true
+}
+
+tasks.register('makeTemplateZip', Zip) {
+	from('mdk_template')
+	archiveFile.set(file("$buildDir/mdk_template.zip"))
+}

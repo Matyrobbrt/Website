@@ -1,0 +1,27 @@
+// fileName: props.modsDotGroovy ? null : defaultName
+modLoader="javafml"
+loaderVersion="[${versions.forge.split('\\.')[0]},)"
+license="${license}"
+# issueTrackerURL="https://change.me.to.your.issue.tracker.example.invalid/"
+[[mods]]
+modId="${modId}"
+version="\${file.jarVersion}"
+displayName="${modName ?: modId.capitalize()}"
+# logoFile="${modId}.png"
+<% if (author) out.print("authors=\"$author\"") %>
+displayTest="${displayTest}"
+description='''${modDescription ?: 'Lorem Ipsum'}'''
+
+[[dependencies.${modId}]]
+    modId="forge"
+    mandatory=true
+    versionRange="[${versions.forge},)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${modId}]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[${versions.minecraft},1.${(versions.minecraft.split('\\.')[1] as int) + 1})"
+    ordering="NONE"
+    side="BOTH"
