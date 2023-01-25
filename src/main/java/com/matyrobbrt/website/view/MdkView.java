@@ -76,11 +76,6 @@ import java.util.zip.ZipOutputStream;
 @PageTitle("Forge MDK Maker")
 @SuppressWarnings("SameParameterValue")
 @Route(value = "/projects/forge-mdk", layout = WebsiteLayout.class)
-@Meta(name = "og:title", content = "Forge MDK Maker")
-@Meta(name = "og:type", content = "website")
-@Meta(name = "og:url", content = "https://matyrobbrt.com/projects/forge-mdk")
-@Meta(name = "og:description", content = "A creator for Forge MDKs")
-@Meta(name = "theme-color", content = "#FF0000")
 public class MdkView extends VerticalLayout {
     public static final Logger LOG = LoggerFactory.getLogger(MdkView.class);
     public static final List<String> LICENSES = List.of(
@@ -117,6 +112,7 @@ public class MdkView extends VerticalLayout {
     private final TextArea description = new TextArea("Mod Description");
     private final TextField author = new TextField("Mod Author");
 
+    private final Checkbox gradleKotlinDSL = new Checkbox("Use Gradle Kotlin DSL");
     private final Checkbox modsDotGroovy = new Checkbox("Use mods.groovy");
     private final Checkbox useATs = new Checkbox("Use access transformers");
     private final Checkbox sharedRunDirs = new Checkbox("Shared run directories");
@@ -131,9 +127,8 @@ public class MdkView extends VerticalLayout {
         add(doneButton());
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     private Map<String, Object> createArgs() {
-        final HashMap map = new HashMap();
+        final HashMap<String, Object> map = new HashMap<>();
         map.put("modId", modId.getValue());
         map.put("modName", name.getValue());
         map.put("modDescription", description.getValue());
@@ -149,6 +144,7 @@ public class MdkView extends VerticalLayout {
         map.put("props", Map.of(
                 "usesAccessTransformers", useATs.getValue(),
                 "sharedRunDirs", sharedRunDirs.getValue(),
+                "gradleKotlinDSL", gradleKotlinDSL.getValue(),
                 "modsDotGroovy", modsDotGroovy.getValue(),
                 "usesMixins", usesMixin.getValue(),
                 "mixinGradle", mixinGradle.getValue(),
@@ -236,7 +232,7 @@ public class MdkView extends VerticalLayout {
             mixinGradle.setValue(event.getValue());
         });
         sharedRunDirs.setValue(true);
-        additionalLayout.add(modsDotGroovy, useATs, sharedRunDirs,
+        additionalLayout.add(gradleKotlinDSL, modsDotGroovy, useATs, sharedRunDirs,
                 new HorizontalLayout(usesMixin, mixinGradle),
                 new HorizontalLayout(apiSrcSet, datagenSrcSet));
         additionalLayout.setPadding(false);

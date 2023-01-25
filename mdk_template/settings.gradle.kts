@@ -1,19 +1,19 @@
-// fileName: props.gradleKotlinDSL ? null : defaultName
+// fileName: props.gradleKotlinDSL == true ? defaultName : null
 pluginManagement {
     repositories {
         gradlePluginPortal()
-        maven { url = 'https://maven.minecraftforge.net/' }<%
+        maven("https://maven.minecraftforge.net/")<%
         if (mappings.channel == 'parchment') {
-            out.print("\n        maven { url = 'https://maven.parchmentmc.org' }")
+            out.print("\n        maven(\"https://maven.parchmentmc.org\")")
         }
         if (props.modsDotGroovy) {
-            out.print("\n        maven { url = 'https://maven.moddinginquisition.org/releases' }")
+            out.print("\n        maven(\"https://maven.moddinginquisition.org/releases\")")
         }
         if (props.mixinGradle) {
             out.print("""
         resolutionStrategy {
             eachPlugin {
-                if (requested.id.toString() == 'org.spongepowered.mixin') {
+                if (requested.id.id == "org.spongepowered.mixin") {
                     useModule("org.spongepowered:mixingradle:\${requested.version}")
                 }
             }
@@ -22,4 +22,4 @@ pluginManagement {
         %>
     }
 }
-rootProject.name = '${modName ?: modId}'
+rootProject.name = "${modName ?: modId}"
