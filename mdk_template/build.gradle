@@ -1,3 +1,4 @@
+// fileName: props.gradleKotlinDSL ? null : defaultName
 plugins {
     id 'eclipse'
     id 'maven-publish'
