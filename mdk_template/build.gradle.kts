@@ -113,7 +113,7 @@ minecraft {
 sourceSets.main { resources { srcDir("src/generated/resources") } }
 
 dependencies {
-    <% if (props.defineVersionsInPropertiesFile == true) out.print("minecraft(\"net.minecraftforge:forge:\${minecraft_version}-\${forge_version}\")") else out.print("minecraft(\"net.minecraftforge:forge:${versions.minecraft}-${versions.forge}\")") %>
+    <% if (props.defineVersionsInPropertiesFile == true) out.print("minecraft(\"net.minecraftforge:forge:\${minecraft_version}-\${forge_version}\")") else out.print("minecraft(\"net.minecraftforge:forge:${versions.minecraft}-${versions.forge}\")") %><% if (props.usesMixins) out.print("\nannotationProcessor(\"org.spongepowered:mixin:0.8.5:processor\"") %>
 }
 
 val manifestAttributes = mutableMapOf(
