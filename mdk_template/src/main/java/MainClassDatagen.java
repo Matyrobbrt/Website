@@ -1,7 +1,7 @@
 // fileName: props.datagenSourceSet ? "src/main/datagen/${packageName.replace('.' as char, '/' as char)}/datagen/${mainClass}Datagen.java" : null
 package ${packageName}.datagen;
 
-import ${packageName};
+import ${packageName}.${mainClass};
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.data.event.GatherDataEvent;

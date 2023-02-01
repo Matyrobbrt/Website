@@ -10,6 +10,7 @@ ModsDotGroovy.make {
     mod {
         modId = '${modId}'
         displayName = '${modName ?: modId.capitalize()}'
+        displayTest = '${displayTest}'
 
         version = this.version
 

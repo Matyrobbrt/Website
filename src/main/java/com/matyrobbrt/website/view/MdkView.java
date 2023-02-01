@@ -1,7 +1,6 @@
 package com.matyrobbrt.website.view;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
+import com.matyrobbrt.website.util.License;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
@@ -18,7 +17,6 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.Meta;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.progressbar.ProgressBarVariant;
 import com.vaadin.flow.component.select.Select;
@@ -35,15 +33,10 @@ import groovy.util.NodeList;
 import groovy.xml.XmlParser;
 import io.github.matyrobbrt.curseforgeapi.util.Utils;
 import org.apache.maven.artifact.versioning.ComparableVersion;
+import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import org.codehaus.groovy.runtime.StringBufferWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -56,6 +49,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
@@ -65,8 +59,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -78,9 +70,6 @@ import java.util.zip.ZipOutputStream;
 @Route(value = "/projects/forge-mdk", layout = WebsiteLayout.class)
 public class MdkView extends VerticalLayout {
     public static final Logger LOG = LoggerFactory.getLogger(MdkView.class);
-    public static final List<String> LICENSES = List.of(
-            "ARR", "MIT", "LGPLv3"
-    );
     public static final ComparableVersion VERSION_1_16_5 = new ComparableVersion("1.16.5");
     public static final Path MDK_ROOT;
     static {
@@ -108,6 +97,7 @@ public class MdkView extends VerticalLayout {
     private final Select<String> mappingsVersion = new Select<>();
 
     private final ComboBox<String> license = new ComboBox<>("License");
+    private final Select<DisplayTest> displayTest = new Select<>();
     private final TextField name = new TextField("Mod Name");
     private final TextArea description = new TextArea("Mod Description");
     private final TextField author = new TextField("Mod Author");
@@ -134,7 +124,7 @@ public class MdkView extends VerticalLayout {
         map.put("modDescription", description.getValue());
         map.put("author", author.getValue());
         map.put("license", license.getValue());
-        map.put("displayTest", "MATCH_VERSION");
+        map.put("displayTest", displayTest.getValue().name());
 
         map.put("packageName", pkg.getValue());
         map.put("mainClass", mainClassName.getValue());
@@ -215,12 +205,17 @@ public class MdkView extends VerticalLayout {
 
         final Details display = new Details("Display");
         license.setRequired(true);
-        license.setItems(LICENSES);
+        license.setItems(License.ALL_LICENSES);
         license.setValue("ARR");
         description.setWidthFull();
 
+        displayTest.setLabel("Side"); displayTest.setRequiredIndicatorVisible(true);
+        displayTest.setEmptySelectionAllowed(false); displayTest.setItems(DisplayTest.values());
+        displayTest.setItemLabelGenerator(DisplayTest::toString);
+        displayTest.setValue(DisplayTest.MATCH_VERSION);
+
         final VerticalLayout displayLayout = new VerticalLayout();
-        displayLayout.add(new HorizontalLayout(name, author, license), description);
+        displayLayout.add(new HorizontalLayout(name, author), new HorizontalLayout(license, displayTest), description);
         displayLayout.setPadding(false);
         display.addContent(displayLayout);
         form.add(display, 2);
@@ -443,28 +438,57 @@ public class MdkView extends VerticalLayout {
                 zos.closeEntry();
             }
         }
+
+        try {
+            final License lic = License.BY_NAME.get(license.getValue());
+            if (lic != null) {
+                final String licenseText = lic.read(String.valueOf(Calendar.getInstance().get(Calendar.YEAR)), (author.getValue() != null && !author.getValue().isBlank()) ? author.getValue() : modId.getValue() + "sareus");
+                zos.putNextEntry(new ZipEntry("LICENSE"));
+                zos.write(licenseText.getBytes(StandardCharsets.UTF_8));
+                zos.closeEntry();
+            }
+        } catch (Exception ignored) {}
+
         zos.close();
 
-        final byte[] data = bao.toByteArray();
-        final String id = UUID.randomUUID().toString();
-        Downloader.MDKs.put(id + ".zip", bao.toByteArray());
-        return data;
+        return bao.toByteArray();
     }
 
-    @Controller
-    public static class Downloader {
-        public static final Cache<String, byte[]> MDKs = Caffeine.newBuilder()
-                .expireAfterWrite(90, TimeUnit.SECONDS)
-                .build();
-        public static final byte[] EMPTY_BODY = new byte[0];
+//    @Controller
+//    public static class Downloader {
+//        public static final Cache<String, byte[]> MDKs = Caffeine.newBuilder()
+//                .expireAfterWrite(90, TimeUnit.SECONDS)
+//                .build();
+//        public static final byte[] EMPTY_BODY = new byte[0];
+//
+//        @RequestMapping(value = "/projects/forge-mdk/mdk-download/{id}", method = RequestMethod.GET, produces = "application/zip")
+//        public ResponseEntity<byte[]> getOrder(@PathVariable("id") String id) {
+//            final byte[] mdk = MDKs.getIfPresent(id);
+//            if (mdk == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(EMPTY_BODY);
+//            return ResponseEntity.status(HttpStatus.OK)
+//                    .header("Content-Disposition", "attachment; filename=\"mdk.zip\"")
+//                    .body(mdk);
+//        }
+//    }
 
-        @RequestMapping(value = "/projects/forge-mdk/mdk-download/{id}", method = RequestMethod.GET, produces = "application/zip")
-        public ResponseEntity<byte[]> getOrder(@PathVariable("id") String id) {
-            final byte[] mdk = MDKs.getIfPresent(id);
-            if (mdk == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(EMPTY_BODY);
-            return ResponseEntity.status(HttpStatus.OK)
-                    .header("Content-Disposition", "attachment; filename=\"mdk.zip\"")
-                    .body(mdk);
+    public enum DisplayTest {
+        MATCH_VERSION {
+            @Override
+            public String toString() {
+                return "Both";
+            }
+        },
+        IGNORE_SERVER_VERSION {
+            @Override
+            public String toString() {
+                return "Server only";
+            }
+        },
+        IGNORE_ALL_VERSION {
+            @Override
+            public String toString() {
+                return "Client only";
+            }
         }
     }
 }
