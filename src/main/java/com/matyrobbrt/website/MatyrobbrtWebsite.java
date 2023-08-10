@@ -22,7 +22,7 @@ public class MatyrobbrtWebsite {
     public static CurseForgeAPI cfApi;
 
     public static void main(String[] args) throws IOException, LoginException {
-        try (final Reader reader = Files.newBufferedReader(Path.of("config.json"))) {
+        try (final Reader reader = Files.newBufferedReader(Path.of("data/config.json"))) {
             configuration = new Gson().fromJson(reader, Configuration.class);
         }
         final ScheduledExecutorService service = Executors.newScheduledThreadPool(1);

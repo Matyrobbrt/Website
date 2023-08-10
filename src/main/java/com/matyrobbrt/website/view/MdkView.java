@@ -78,7 +78,7 @@ public class MdkView extends VerticalLayout {
             MDK_ROOT = dir.toAbsolutePath();
         } else {
             try {
-                final FileSystem fs = FileSystems.newFileSystem(Path.of("mdk_template.zip"), Map.of());
+                final FileSystem fs = FileSystems.newFileSystem(Path.of("data/mdk_template.zip"), Map.of());
                 MDK_ROOT = fs.getPath("/");
             } catch (IOException e) {
                 throw new RuntimeException(e);
