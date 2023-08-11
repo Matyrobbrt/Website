@@ -24,6 +24,18 @@ jobs:
              distribution: 'zulu' # See 'Supported distributions' for available options
 
              java-version: '17'
+           
+          - name: Setup Node.js
+
+            uses: actions/setup-node@v2
+
+            with:
+
+               node-version: '18' 
+          - name: Install PNPM 
+          - run: npm i -g pnpm
+          - name: Install deps
+          - run: pnpm install --no-frozen-lockfile
           - name: Run build with Gradle Wrapper
             run: ./gradlew clean build -Pvaadin.productionMode -Dvaadin.ci.build=true --stacktrace
 
